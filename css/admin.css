@@ -1,0 +1,24 @@
+
+
+form#soap_auth_settings_form ul li label {
+	width: 200px;
+	float:left;
+}
+form#soap_auth_settings_form ul li input, form#soap_auth_settings_form ul li textarea {width: 500px;}
+form#soap_auth_settings_form ul li p.submit input {width: auto;}
+p#tooltip {
+	width: 250px;
+	border: 1px solid #CCCCCC;
+	padding: 3px;
+	background: #0D0D0D;
+	color: #FFFFFF;
+	-moz-border-radius: 5px;
+	-webkit-border-radius: 5px;
+	border-radius: 5px;
+	filter: alpha(opacity=65);
+	-moz-opacity: 0.65;
+	opacity: 0.65;
+}
+span.help img {
+	vertical-align: top;
+}
