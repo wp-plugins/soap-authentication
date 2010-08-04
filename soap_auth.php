@@ -1,7 +1,7 @@
 <?php
 /*
 	Plugin Name: SOAP Authentication
-	Plugin URI: http://matthewkellett.co.uk/developments/wordpress/soap-auth.php
+	Plugin URI: http://matthewkellett.co.uk/portfolio/soap-auth.php
 	Description: Used to externally authenticate WP users using a SOAP Service
 	Version: 1.0
 	Author: Matthew Kellett
