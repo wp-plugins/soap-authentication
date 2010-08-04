@@ -1,6 +1,6 @@
 === Plugin Name ===
-Contributors: gizzmoasus
-Donate link: http://matthewkellett.co.uk/developments/wordpress/soap-auth.php/
+Contributors: GizzmoAsus
+Donate link: http://matthewkellett.co.uk/portfolio/soap-auth.php
 Tags: soap, authentication, register
 Requires at least: 3.0
 Tested up to: 3.1
