@@ -1,6 +1,6 @@
 === Plugin Name ===
 Contributors: GizzmoAsus
-Donate link: http://matthewkellett.co.uk/portfolio/soap-auth.php
+Donate link: http://matthewkellett.co.uk/portfolio/addons/wordpress/soap-auth.html
 Tags: soap, authentication, register
 Requires at least: 3.0
 Tested up to: 3.1
@@ -37,6 +37,11 @@ In the event you have problems then please visit the plugin website and contact 
 2. This login screen with a custom message
 
 == Changelog ==
+
+= 1.1 =
+* Updated the documentation throughout the class to help modifications,
+* Updated code structure to improve readability
+* Updated links associated with the plugin to go to the correct destination
 
 = 1.0 =
 Latest Release - No recent changes

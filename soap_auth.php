@@ -3,7 +3,7 @@
 	Plugin Name: SOAP Authentication
 	Plugin URI: http://matthewkellett.co.uk/portfolio/soap-auth.php
 	Description: Used to externally authenticate WP users using a SOAP Service
-	Version: 1.0
+	Version: 1.1
 	Author: Matthew Kellett
 	Author URI: http://matthewkellett.co.uk
 	License: GNU General Public License (GPL) version 2
@@ -24,7 +24,14 @@
 	Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 */
 
-function is_wpmu_enabled(){
+/**
+ * is_wpmu_enabled()
+ *
+ * Checks to see if WPMU is installed and returns a boolean value based on the result
+ *
+ * @return boolean Returns true if WPMU is enabled, otherwise false
+ */
+function is_wpmu_enabled() {
 	# check if we can detect the version (not always available though)
 	global $wmpu_version;
 	if (isset($wpmu_version) && $wpmu_version != "") {
@@ -39,16 +46,28 @@ function is_wpmu_enabled(){
 	return false;
 }
 
-
 /**
  * Soap_Auth
  *
  * A class to authenticate wordpress users using an external SOAP service
  *
- * @author Matthew Kellett <email@matthewkellett.co.uk>
- *
+ * @author Matthew Kellett
+ * @version 1.1
+ * @change Updated structure and added docblocks to all functions
+ * @todo Add the ability to use custom parameters in the soap call
+ * @todo Add additional messages to the options so they can be set via the settings page
  */
 class Soap_Auth {
+
+	/**
+	 * Soap_Auth::getOptions()
+	 *
+	 * This function sets up all of the options for the soap auth class i.e. generates
+	 * the options array, collects the current system roles for permission mappings and
+	 * registers these options with the system
+	 *
+	 * @return void
+	 */
 	function getOptions() {
 		$options = get_option('soap_auth_options');
 		if (!is_array($options)) {
@@ -85,7 +104,17 @@ class Soap_Auth {
 		return $options;
 	}
 
-	function updateOptions(){
+	/**
+	 * Soap_Auth::updateOptions()
+	 *
+	 * This function will update the available options for the soap auth class.
+	 * All parameters passes through from the $_POST array are cleansed before
+	 * being assigned to the relevant options. Also adds the styles and javascript
+	 * necessary for the admin interfaces to work correctly.
+	 *
+	 * @return void
+	 */
+	function updateOptions() {
 		if(isset($_POST['save_soap_settings'])) {
 			$options = Soap_Auth::getOptions();
 
@@ -136,14 +165,46 @@ class Soap_Auth {
 		wp_enqueue_script('soap_auth_scripts', $admin_script_url, false, "1.0");
 	}
 
+	/**
+	 * Soap_Auth::soap_auth_add_menu()
+	 *
+	 * Creates the default menu option once the plugin has been activated. If WPMU
+	 * is enabled then this will be added to the main WPMU menu, otherwise it will
+	 * add it to the main options menu
+	 *
+	 * @return void
+	 */
 	function soap_auth_add_menu() {
 		if (is_wpmu_enabled()) {
-			add_submenu_page('ms-admin.php',__('Soap Authentication', 'Soap_Auth'), __('Soap Authentication', 'Soap_Auth'), 'manage_options', basename(__FILE__), array('Soap_Auth', 'soap_auth_display_options'));
+			# add the menu to the main WPMU menu
+			add_submenu_page(
+				'ms-admin.php',
+				__('Soap Authentication', 'Soap_Auth'),
+				__('Soap Authentication', 'Soap_Auth'),
+				'manage_options',
+				basename(__FILE__),
+				array('Soap_Auth', 'soap_auth_display_options')
+			);
 		} else {
-			add_options_page(__('Soap Authentication', 'Soap_Auth'), __('Soap Authentication', 'Soap_Auth'), 'manage_options', basename(__FILE__), array('Soap_Auth', 'soap_auth_display_options'));
+			# add the menu to the main options section
+			add_options_page(
+				__('Soap Authentication', 'Soap_Auth'),
+				__('Soap Authentication', 'Soap_Auth'),
+				'manage_options', basename(__FILE__),
+				array('Soap_Auth', 'soap_auth_display_options')
+			);
 		}
 	}
 
+	/**
+	 * Soap_Auth::soap_auth_display_options()
+	 *
+	 * This function builds the main admin interface for the plugin. It basically
+	 * builds a form and adds the options to it in the relevant sections. If WPMU
+	 * is enabled then an extra role mapping is provided to allow the super admin role
+	 *
+	 * @return void
+	 */
 	function soap_auth_display_options() {
 		# initialise global objects
 		global $wp_roles;
@@ -300,19 +361,27 @@ class Soap_Auth {
 		<?php
 	}
 
-
-	#actual meat of plugin - essentially, you're setting $username and $password to pass on to the system.
-	#You check from your external system and insert/update users into the WP system just before WP actually
-	#authenticates with its own database.
+	/**
+	 * Soap_Auth::soap_auth_check_login()
+	 *
+	 * This is the main authentication function of the plugin. Given both the username and password it will
+	 * make use of the options set to authenticate against an external soap service. If a user is authenticated
+	 * and already exists in the system then their details will be updated, otherwise it will generate a new
+	 * user and set up their permissions based on the mappings.
+	 *
+	 * @param string $username
+	 * @param string $password
+	 * @return void
+	 */
 	function soap_auth_check_login($username, $password) {
 		require_once(ABSPATH.'wp-includes/registration.php');
 
 		$options = Soap_Auth::getOptions();
 		$soap_url = ($options['soap_wsdl_path'] != "") ? $options['soap_wsdl_path'] : null;
-		#if on same host have to use resource id to make sure you don't lose the wp db connection
+		# if on same host have to use resource id to make sure you don't lose the wp db connection
 
 		if (!is_null($soap_url)) {
-			#do the password hash for comparing
+			#do the password hash for comparison
 			switch($options['enc_method']) {
 				case "SHA256 Hash" :
 					$password2 = hash('sha256',trim($password));
@@ -328,6 +397,7 @@ class Soap_Auth {
 					break;
 			}
 
+			# carry out the soap call to authenticate the user
 			try{
 				$method = $options['auth_function'];
 				$client = new SoapClient($options['soap_wsdl_path']);
@@ -383,13 +453,13 @@ class Soap_Auth {
 					$wp_roles = new WP_Roles();
 					$all_roles = $wp_roles->get_names();
 
-					foreach ($all_roles as $name => $display){
+					foreach ($all_roles as $name => $display) {
 						// $options['role_'.$name] == $user_role
 						$role_match = false;
 						if (isset($options['role_'.$name]) && stristr($options['role_'.$name], ",")) {
 							# multiple role maps so set them up
 							$mappings = explode(",",$options['role_'.$name]);
-							foreach ($mappings as $map){
+							foreach ($mappings as $map) {
 								if ($map == $user_role) {
 									$role_match = true;
 								}
@@ -426,7 +496,7 @@ class Soap_Auth {
 				global $error_type;
 				$error_type = "noauth";
 			}
-		}else{
+		} else {
 			global $error_msg;
 			$error_msg = "The authentication settings could not be found, please contact an administrator to update these so you can log in";
 			global $error_type;
@@ -434,7 +504,16 @@ class Soap_Auth {
 		}
 	}
 
-	function object2array($object){
+	/**
+	 * Soap_Auth::object2array()
+	 *
+	 * Convenient (recursive) function to convert an object to an array
+	 *
+	 * @param mixed $object The object to convert to an array, typically a simpleXML Object in this instance
+	 * @return mixed Returns either the array or the object if it can't be converted
+	 */
+	function object2array($object) {
+		# ensure we are dealing with an object before converting to an array
 		if (is_array($object) || is_object($object)) {
 			$array = array();
 			foreach($object as $key => $value){
@@ -445,12 +524,27 @@ class Soap_Auth {
 		return $object;
 	}
 
-	//gives warning for login - where to get "source" login
+	/**
+	 * Soap_Auth::soap_auth_warning()
+	 *
+	 * Prints out a the message to be displayed on the login screen,
+	 * this needs to be set up in the WP options page
+	 *
+	 * @return void
+	 */
 	function soap_auth_warning() {
 		$opts = Soap_Auth::getOptions();
 		echo "<div class=\"message\">".$opts['login_message']."</div>";
 	}
 
+	/**
+	 * Soap_Auth::soap_errors()
+	 *
+	 * A function for building the error messages that can be used throughout the
+	 * system, typically on the login page though
+	 *
+	 * @return string Returns the error message from the soap authentication call
+	 */
 	function soap_errors() {
 		global $error;
 		global $error_type;
@@ -481,32 +575,65 @@ class Soap_Auth {
 		return $error_out;
 	}
 
-	//hopefully grays stuff out.
+	/**
+	 * Soap_Auth::soap_warning()
+	 *
+	 * This function outputs a warning to the main user profile section to inform
+	 * the users that changes to personal information will be overwritten if changed
+	 * the next time they log in
+	 *
+	 * @return void
+	 */
 	function soap_warning() {
 		echo '<strong style="color:red;">Any changes made below WILL NOT be preserved when you login again. You have to change your personal information per instructions found in the <a href="../wp-login.php">login box</a>.</strong>';
 	}
 
-	//disables the (useless) password reset option in WP when this plugin is enabled.
+	/**
+	 * Soap_Auth::soap_show_password_fields()
+	 *
+	 * Disables the password reset option in WP when this plugin is enabled because
+	 * this should be handled by the main user system and not the wordpress system
+	 *
+	 * @return
+	 */
 	function soap_show_password_fields() {
 		return 0;
 	}
 
-
-	/*
-	 * Disable functions.  Idea taken from http auth plugin.
+	/**
+	 * Soap_Auth::disable_function_register()
+	 *
+	 * This functions will disable the default registration for the system when
+	 * the soap auth plugin is enabled
+	 *
+	 * @return void
 	 */
 	function disable_function_register() {
 		$errors = new WP_Error();
-		$errors->add('registerdisabled', __('User registration is not available from this site, so you can\'t create an account or retrieve your password from here. See the message above.'));
+		$errors->add(
+			'registerdisabled',
+			__('User registration is not available from this site, so you can\'t create an account or retrieve your password from here. See the message above.')
+		);
 		?></form><br /><div id="login_error">User registration is not available from this site, so you can't create an account or retrieve your password from here. See the message above.</div>
 				<p id="backtoblog"><a href="<?php bloginfo('url'); ?>/" title="<?php _e('Are you lost?') ?>"><?php printf(__('&larr; Back to %s'), get_bloginfo('title', 'display' )); ?></a></p>
 			<?php
 		exit();
 	}
 
+	/**
+	 * Soap_Auth::disable_function()
+	 *
+	 * The main error function to be used when a user tries to
+	 * register or uses the forgotten password form
+	 *
+	 * @return void
+	 */
 	function disable_function() {
 		$errors = new WP_Error();
-		$errors->add('registerdisabled', __('User registration is not available from this site, so you can\'t create an account or retrieve your password from here. See the message above.'));
+		$errors->add(
+			'registerdisabled',
+			__('User registration is not available from this site, so you can\'t create an account or retrieve your password from here. See the message above.')
+		);
 		login_header(__('Log In'), '', $errors);
 		?>
 			<p id="backtoblog"><a href="<?php bloginfo('url'); ?>/" title="<?php _e('Are you lost?') ?>"><?php printf(__('&larr; Back to %s'), get_bloginfo('title', 'display' )); ?></a></p>
@@ -515,6 +642,10 @@ class Soap_Auth {
 	}
 }
 
+/**
+ * Register the functions form the Soap_Auth class within the
+ * relevant sections of the system
+ */
 add_action('admin_menu', array('Soap_Auth', 'updateOptions'));
 add_action('wp_authenticate', array('Soap_Auth', 'soap_auth_check_login'), 1, 2);
 add_action('lost_password', array('Soap_Auth', 'disable_function'));
