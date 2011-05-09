@@ -159,8 +159,13 @@ class Soap_Auth {
 		Soap_Auth::soap_auth_add_menu();
 
 		#add styles
-		wp_deregister_script('jquery');
-		wp_register_script('jquery', WP_PLUGIN_URL . '/soap-auth/js/jquery-1.4.2.js');
+		if (file_exists('/soap-auth/js/jquery-1.4.2.js')) {
+			wp_deregister_script('jquery');
+			wp_register_script('jquery', WP_PLUGIN_URL . '/soap-auth/js/jquery-1.4.2.js');
+		} else if (file_exists('/soap-authentication/js/jquery-1.4.2.js')) {
+			wp_deregister_script('jquery');
+			wp_register_script('jquery', WP_PLUGIN_URL . '/soap-authentication/js/jquery-1.4.2.js');
+		}
 		$admin_script_url = WP_PLUGIN_URL . '/soap-auth/js/admin.js';
 		wp_enqueue_script('soap_auth_scripts', $admin_script_url, false, "1.0");
 	}
@@ -244,7 +249,7 @@ class Soap_Auth {
 				echo '<option>SHA256 Hash</option><option>SHA1</option><option selected="selected">MD5</option><option>Plain Text (not advised)</option>';
 				break;
 			case "Plain" :
-				echo '<option>SHA256 Hash</option><option>SHA1</option><option selected="selected">MD5</option><option selected="seclected">Plain Text (not advised)</option>';
+				echo '<option>SHA256 Hash</option><option>SHA1</option><option selected="selected">MD5</option><option selected="selected">Plain Text (not advised)</option>';
 			break;
 			default :
 				echo '<option selected="selected">SHA256 Hash</option><option>SHA1</option><option>MD5</option><option>Plain Text (not advised)</option>';

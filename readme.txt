@@ -12,7 +12,6 @@ A plugin for SOAP authentication using an external webservice
 
 This plugin allows the use of an external SOAP based webservice to overwrite the default authentication of users within a Wordpress installation. Users are authenticated using the external webservice then added to the local Wordpress database based on the values in the plugin settings. This is done to allow for the role mapping of permissions from an external system to the Wordpress roles.
 
-
 == Installation ==
 
 1. Edit the `admin.js` file within the `soap-auth` folder to set the correct image path for the help image
@@ -38,6 +37,10 @@ In the event you have problems then please visit the plugin website and contact 
 
 == Changelog ==
 
+= 1.2 =
+* Fixed spelling mistake when setting the encryption method
+* Updated the jQuery detection paths to prevent mis-matches in jQuery versioning
+
 = 1.1 =
 * Updated the documentation throughout the class to help modifications,
 * Updated code structure to improve readability
@@ -48,5 +51,8 @@ Latest Release - No recent changes
 
 == Upgrade Notice ==
 
+= 1.2 =
+Latest Release - Fixed a couple of issues with the admin control panel thanks to D for spotting the issues.
+
 = 1.0 =
-Latest Release - No upgrades available
+Initial release of the plugin
