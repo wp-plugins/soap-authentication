@@ -37,6 +37,9 @@ In the event you have problems then please visit the plugin website and contact 
 
 == Changelog ==
 
+= 1.3 =
+* Updated encryption methods to fix a small issue with select not being passed through correctly
+
 = 1.2 =
 * Fixed spelling mistake when setting the encryption method
 * Updated the jQuery detection paths to prevent mis-matches in jQuery versioning

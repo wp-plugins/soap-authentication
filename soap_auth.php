@@ -3,7 +3,7 @@
 	Plugin Name: SOAP Authentication
 	Plugin URI: http://matthewkellett.co.uk/portfolio/soap-auth.php
 	Description: Used to externally authenticate WP users using a SOAP Service
-	Version: 1.1
+	Version: 1.3
 	Author: Matthew Kellett
 	Author URI: http://matthewkellett.co.uk
 	License: GNU General Public License (GPL) version 2
@@ -239,21 +239,31 @@ class Soap_Auth {
 							<select name="enc_method" id="enc_method">
 		<?php
 		switch($options['enc_method']) {
-			case "SHA256 Hash" :
-				echo '<option selected="selected">SHA256 Hash</option><option>SHA1</option><option>MD5</option><option>Plain Text (not advised)</option>';
-			break;
-			case "SHA1" :
-				echo '<option>SHA256 Hash</option><option selected="selected">SHA1</option><option>MD5</option><option>Plain Text (not advised)</option>';
-			break;
-			case "MD5" :
-				echo '<option>SHA256 Hash</option><option>SHA1</option><option selected="selected">MD5</option><option>Plain Text (not advised)</option>';
+			case "sha1" :
+				echo '<option value="sha256">SHA256 Hash</option>
+					<option value="sha1" selected="selected">SHA1</option>
+					<option value="md5">MD5</option>
+					<option value="plain">Plain Text (not advised)</option>';
 				break;
-			case "Plain" :
-				echo '<option>SHA256 Hash</option><option>SHA1</option><option selected="selected">MD5</option><option selected="selected">Plain Text (not advised)</option>';
-			break;
-			default :
-				echo '<option selected="selected">SHA256 Hash</option><option>SHA1</option><option>MD5</option><option>Plain Text (not advised)</option>';
-			break;
+			case "md5" :
+				echo '<option value="sha256">SHA256 Hash</option>
+					<option value="sha1">SHA1</option>
+					<option value="md5" selected="selected">MD5</option>
+					<option value="plain">Plain Text (not advised)</option>';
+				break;
+			case "plain" :
+				echo '<option value="sha256">SHA256 Hash</option>
+					<option value="sha1">SHA1</option>
+					<option value="md5">MD5</option>
+					<option value="plain" selected="selected">Plain Text (not advised)</option>';
+				break;
+			case "sha256" :
+			default:
+				echo '<option value="sha256" selected="selected">SHA256 Hash</option>
+					<option value="sha1">SHA1</option>
+					<option value="md5">MD5</option>
+					<option value="plain">Plain Text (not advised)</option>';
+				break;
 		}
 		?>
 							</select>
@@ -388,16 +398,16 @@ class Soap_Auth {
 		if (!is_null($soap_url)) {
 			#do the password hash for comparison
 			switch($options['enc_method']) {
-				case "SHA256 Hash" :
+				case "sha256" :
 					$password2 = hash('sha256',trim($password));
 					break;
-				case "SHA1" :
+				case "sha1" :
 					$password2 = sha1(trim($password));
 				break;
-				case "MD5" :
+				case "md5" :
 					$password2 = md5(trim($password));
 					break;
-				case "Plain" :
+				case "plain" :
 					$password2 = $password;
 					break;
 			}
